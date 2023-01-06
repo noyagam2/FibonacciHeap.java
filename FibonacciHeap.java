@@ -1,5 +1,12 @@
 import java.util.LinkedList;
 
+// This imports are used for printing the heap
+import java.util.List;
+import hu.webarticum.treeprinter.TreeNode;
+import hu.webarticum.treeprinter.decorator.BorderTreeNodeDecorator;
+import hu.webarticum.treeprinter.printer.traditional.TraditionalTreePrinter;
+import hu.webarticum.treeprinter.text.ConsoleText;
+
 
 /**
  * FibonacciHeap
@@ -8,10 +15,11 @@ import java.util.LinkedList;
  */
 public class FibonacciHeap
 {
+
+
     private static int  num_of_links=0;
     private static int  num_of_cuts=0;
     private int  num_of_marked=0;
-    private int max_rank=0;
     private HeapNode min = null;
     private int num_of_nodes=0;
     private LinkedList<HeapNode> treeList;
@@ -85,7 +93,7 @@ public class FibonacciHeap
     */
     public void meld (FibonacciHeap heap2)
     {
-    	  this.max_rank = this. max_rank > heap2.max_rank ? this.max_rank : heap2.max_rank;
+
           this.num_of_nodes += heap2.num_of_nodes;
           this.min = this.min.getKey() < heap2.min.getKey() ? this.min : heap2.min;
           this.treeList.addAll(heap2.treeList);
@@ -220,7 +228,6 @@ public class FibonacciHeap
         parent.setRank(parent.getRank() + 1);
         child.setParent(parent);
         num_of_links++;
-        max_rank = parent.getRank() > this.max_rank ? parent.getRank() : this.max_rank;
         return parent;
     }
 
@@ -240,7 +247,7 @@ public class FibonacciHeap
             HeapNode new_root = link(node, other_tree);
             buckets[curr_tree_rank] = null;
             ranks[curr_tree_rank] = 0;
-            ranks[new_root.getRank()] = 1;
+            fillBuckets(new_root, ranks, buckets);
             buckets[new_root.getRank()] = new_root;
         }
         else{
@@ -255,8 +262,9 @@ public class FibonacciHeap
      * @post the heap contains only trees of different ranks
      */
     protected void consolidate(){
-        int[] ranks = new int[max_rank + 1];
-        HeapNode[] buckets = new HeapNode[max_rank + 1];
+        int highest_rank = (int) (Math.log(num_of_nodes) / Math.log(2) +1);
+        int[] ranks = new int[highest_rank];
+        HeapNode[] buckets = new HeapNode[highest_rank];
         HeapNode curr_min = this.treeList.getFirst();
         for (HeapNode node : this.treeList){
             curr_min = node.getKey() < curr_min.getKey() ? node : curr_min;
@@ -271,9 +279,14 @@ public class FibonacciHeap
         }
     }
 
-    protected int getMaxRank() {
-        return max_rank;
+    protected void printHeap(){
+        for (HeapNode node : this.treeList){
+            new TraditionalTreePrinter().print(new BorderTreeNodeDecorator(node));
+        }
     }
+
+
+
 
 
 
@@ -290,7 +303,7 @@ public class FibonacciHeap
     *
     */
 
-    public static class HeapNode{
+    public static class HeapNode implements TreeNode {
 
     	public int key;
         private HeapNode parent;
@@ -360,7 +373,24 @@ public class FibonacciHeap
         }
 
 
-    }
+       /**
+        * Gets the content of this node.
+        */
+       @Override
+       public ConsoleText content() {
+              String s = " " + this.getKey() + " ";
+                return  ConsoleText.of(s);
+       }
+
+       /**
+        * Gets the list of child nodes of this node.
+        */
+       @Override
+       public List<TreeNode> children() {
+           return new LinkedList<>(this.getChildren());
+       }
+
+   }
 }
 
 
