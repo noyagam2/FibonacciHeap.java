@@ -212,7 +212,7 @@ public class FibonacciHeap
      * @param node2 the root of the second tree
      * @return the root of the new tree
      */
-    private HeapNode link(HeapNode node1, HeapNode node2){
+    protected HeapNode link(HeapNode node1, HeapNode node2){
         boolean isNode1Min = (node1.getKey() < node2.getKey());
         HeapNode parent = isNode1Min ? node1 : node2;
         HeapNode child = isNode1Min ? node2 : node1;
@@ -233,7 +233,7 @@ public class FibonacciHeap
      * @param buckets an array that contains the trees in the heap
      */
 
-    private void fillBuckets(HeapNode node, int[] ranks, HeapNode[] buckets){
+    protected void fillBuckets(HeapNode node, int[] ranks, HeapNode[] buckets){
         int curr_tree_rank = node.getRank();
         if(ranks[curr_tree_rank] == 1){
             HeapNode other_tree = buckets[curr_tree_rank];
@@ -254,7 +254,7 @@ public class FibonacciHeap
      * a function that consolidates the trees in the heap
      * @post the heap contains only trees of different ranks
      */
-    private void consolidate(){
+    protected void consolidate(){
         int[] ranks = new int[max_rank + 1];
         HeapNode[] buckets = new HeapNode[max_rank + 1];
         HeapNode curr_min = this.treeList.getFirst();
@@ -269,6 +269,10 @@ public class FibonacciHeap
                 this.treeList.addLast(bucket);
             }
         }
+    }
+
+    protected int getMaxRank() {
+        return max_rank;
     }
 
 
