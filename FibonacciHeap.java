@@ -10,14 +10,13 @@ public class FibonacciHeap
 {
     private static int  num_of_links=0;
     private static int  num_of_cuts=0;
+    private int  num_of_marked=0;
     private int max_rank=0;
-    private HeapNode min;
-    private int num_of_nodes;
+    private HeapNode min = null;
+    private int num_of_nodes=0;
     private LinkedList<HeapNode> treeList;
 
     public FibonacciHeap() {
-        min = null;
-        num_of_nodes = 0;
         treeList = new LinkedList<>();
     }
 
@@ -47,6 +46,9 @@ public class FibonacciHeap
         if (this.isEmpty()){
             this.min = node;
         }
+        else{
+            this.min = key < this.min.getKey() ? node : this.min;
+        }
         this.num_of_nodes++;
         this.treeList.addFirst(node);
         return node;
@@ -72,7 +74,7 @@ public class FibonacciHeap
     */
     public HeapNode findMin()
     {
-    	return new HeapNode(678);// should be replaced by student code
+    	return this.min;
     }
 
    /**
@@ -83,7 +85,11 @@ public class FibonacciHeap
     */
     public void meld (FibonacciHeap heap2)
     {
-    	  return; // should be replaced by student code
+    	  this.max_rank = this. max_rank > heap2.max_rank ? this.max_rank : heap2.max_rank;
+          this.num_of_nodes += heap2.num_of_nodes;
+          this.min = this.min.getKey() < heap2.min.getKey() ? this.min : heap2.min;
+          this.treeList.addAll(heap2.treeList);
+
     }
 
    /**
@@ -140,7 +146,7 @@ public class FibonacciHeap
     */
     public int nonMarked()
     {
-        return -232; // should be replaced by student code
+        return this.num_of_nodes - this.num_of_marked;
     }
 
    /**
@@ -167,7 +173,7 @@ public class FibonacciHeap
     */
     public static int totalLinks()
     {
-    	return -345; // should be replaced by student code
+    	return num_of_links; // should be replaced by student code
     }
 
    /**
@@ -179,7 +185,7 @@ public class FibonacciHeap
     */
     public static int totalCuts()
     {
-    	return -456; // should be replaced by student code
+        return num_of_cuts; // should be replaced by student code
     }
 
      /**
@@ -195,6 +201,7 @@ public class FibonacciHeap
         int[] arr = new int[100];
         return arr; // should be replaced by student code
     }
+
 
     /**
      * a function that links two trees of the same rank
@@ -218,10 +225,28 @@ public class FibonacciHeap
     }
 
     /**
-     * a function that consolidates the trees in the heap
-     * @post the heap contains only trees of different ranks
+     * a function that fills the buckets array with the trees in the heap
+     * @pre the buckets array is empty
+     * @post the buckets array contains the trees in the heap, after linking them
+     * @param node the root of the tree to be added to the buckets array
+     * @param ranks an array that contains the number of trees with each rank
+     * @param buckets an array that contains the trees in the heap
      */
-    private void consolidate(){
+
+    private void fillBuckets(HeapNode node, int[] ranks, HeapNode[] buckets){
+        int curr_tree_rank = node.getRank();
+        if(ranks[curr_tree_rank] == 1){
+            HeapNode other_tree = buckets[curr_tree_rank];
+            HeapNode new_root = link(node, other_tree);
+            buckets[curr_tree_rank] = null;
+            ranks[curr_tree_rank] = 0;
+            ranks[new_root.getRank()] = 1;
+            buckets[new_root.getRank()] = new_root;
+        }
+        else{
+            buckets[curr_tree_rank] = node;
+            ranks[curr_tree_rank] = 1;
+        }
 
     }
 
@@ -229,6 +254,23 @@ public class FibonacciHeap
      * a function that consolidates the trees in the heap
      * @post the heap contains only trees of different ranks
      */
+    private void consolidate(){
+        int[] ranks = new int[max_rank + 1];
+        HeapNode[] buckets = new HeapNode[max_rank + 1];
+        HeapNode curr_min = this.treeList.getFirst();
+        for (HeapNode node : this.treeList){
+            curr_min = node.getKey() < curr_min.getKey() ? node : curr_min;
+            fillBuckets(node, ranks, buckets);
+        }
+        this.min = curr_min;
+        this.treeList.clear();
+        for (HeapNode bucket : buckets) {
+            if (bucket != null) {
+                this.treeList.addLast(bucket);
+            }
+        }
+    }
+
 
 
 
