@@ -68,7 +68,27 @@ public class FibonacciHeap
     */
     public void deleteMin()
     {
-     	return; // should be replaced by student code
+        if (this.isEmpty()){
+            this.min = null;
+            return;
+        }
+        this.num_of_nodes--;
+        int index_of_min = this.treeList.indexOf(this.min); // O(n)!!!!
+        //TODO find a way to do this in O(1)
+
+        this.treeList.remove(this.min);
+        if (this.min.getChildren().size() > 0){
+            for (HeapNode child : this.min.getChildren()){
+                child.setParent(null);
+                if (child.isMarked()){
+                    child.setMarked(false);
+                    this.num_of_marked--;
+                }
+                this.treeList.add(index_of_min, child);
+                index_of_min++;
+            }
+        }
+        this.consolidate();
 
     }
 
@@ -118,8 +138,12 @@ public class FibonacciHeap
     */
     public int[] countersRep()
     {
-    	int[] arr = new int[100];
-        return arr; //	 to be replaced by student code
+        int highest_rank = (int) (Math.log(this.num_of_nodes) / Math.log(2) +1);
+        int[] ranks = new int[highest_rank];
+        for (HeapNode node : this.treeList){
+            ranks[node.getRank()]++;
+        }
+        return ranks;
     }
 
    /**
@@ -131,7 +155,8 @@ public class FibonacciHeap
     */
     public void delete(HeapNode x)
     {
-    	return; // should be replaced by student code
+        this.decreaseKey(x, Integer.MIN_VALUE);
+        this.deleteMin();
     }
 
    /**
@@ -142,7 +167,12 @@ public class FibonacciHeap
     */
     public void decreaseKey(HeapNode x, int delta)
     {
-    	return; // should be replaced by student code
+    	x.setKey(x.getKey()-delta);
+        this.min = x.getKey() < this.min.getKey() ? x : this.min;
+        if (x.getKey() < x.getParent().getKey()){
+            this.cascadingCuts(x);
+        }
+
     }
 
    /**
@@ -166,7 +196,7 @@ public class FibonacciHeap
     */
     public int potential()
     {
-        return -234; // should be replaced by student code
+        return this.treeList.size() + 2*this.num_of_marked;
     }
 
    /**
@@ -204,7 +234,16 @@ public class FibonacciHeap
     */
     public static int[] kMin(FibonacciHeap H, int k)
     {
-        int[] arr = new int[100];
+        int[] arr = new int[k];
+        FibonacciHeap aux_heap = new FibonacciHeap();
+        for (int i= 0 ; i<k ; i++){
+            HeapNode min = H.findMin();
+            arr[i] = min.getKey();
+            H.deleteMin();
+            for (HeapNode child : min.getChildren()){
+                aux_heap.insert(child.getKey());
+            }
+        }
         return arr; // should be replaced by student code
     }
 
@@ -260,7 +299,7 @@ public class FibonacciHeap
      * @post the heap contains only trees of different ranks
      */
     protected void consolidate(){
-        int highest_rank = (int) (Math.log(num_of_nodes) / Math.log(2) +1);
+        int highest_rank = (int) (Math.log(this.num_of_nodes) / Math.log(2) +1);
         int[] ranks = new int[highest_rank];
         HeapNode[] buckets = new HeapNode[highest_rank];
         HeapNode curr_min = this.treeList.getFirst();
@@ -273,6 +312,25 @@ public class FibonacciHeap
         for (HeapNode bucket : buckets) {
             if (bucket != null) {
                 this.treeList.addLast(bucket);
+            }
+        }
+    }
+
+    protected void cascadingCuts(HeapNode node){
+        HeapNode parent = node.getParent();
+        if(parent != null){ // node is not the root
+            if(!node.isMarked()){ // node is not marked
+                node.setMarked(true);
+                this.num_of_marked++;
+            }
+            else{
+                parent.removeChild(node); // cut node from parent
+                this.num_of_marked--;
+                num_of_cuts++;
+                this.treeList.addFirst(node);
+                node.setParent(null);
+                node.setMarked(false);
+                cascadingCuts(parent); // cut parent recursively
             }
         }
     }
@@ -382,7 +440,7 @@ public class FibonacciHeap
          * a function that sets the mark of the node to a new mark
          * @param mark the new mark of the node
          */
-        public void setMark(boolean mark) {
+        public void setMarked(boolean mark) {
             this.mark = mark;
         }
 
