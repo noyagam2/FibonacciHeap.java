@@ -15,8 +15,6 @@ import hu.webarticum.treeprinter.text.ConsoleText;
  */
 public class FibonacciHeap
 {
-
-
     private static int  num_of_links=0;
     private static int  num_of_cuts=0;
     private int  num_of_marked=0;
