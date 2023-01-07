@@ -246,7 +246,6 @@ public class FibonacciHeap
             buckets[curr_tree_rank] = null;
             ranks[curr_tree_rank] = 0;
             fillBuckets(new_root, ranks, buckets);
-            buckets[new_root.getRank()] = new_root;
         }
         else{
             buckets[curr_tree_rank] = node;
@@ -257,6 +256,7 @@ public class FibonacciHeap
 
     /**
      * a function that consolidates the trees in the heap
+     * @pre the heap is not empty
      * @post the heap contains only trees of different ranks
      */
     protected void consolidate(){
@@ -310,6 +310,10 @@ public class FibonacciHeap
         private int rank;
 
 
+        /**
+         * constructor for HeapNode
+         * @param key the key of the node
+         */
         public HeapNode(int key) {
             this.key = key;
             this.parent = null;
@@ -318,54 +322,109 @@ public class FibonacciHeap
 
         }
 
+        /**
+         * a function that returns the key of the node
+         * @return the key of the node
+         */
         public int getKey() {
             return this.key;
         }
 
+       /**
+        * a function that sets the key of the node to a new key
+        * @param key the new key of the node
+        */
         public void setKey(int key) {
             this.key = key;
         }
 
+        /**
+         * a function that returns the parent of the node
+         * @return the parent of the node
+         */
         public HeapNode getParent() {
             return parent;
         }
 
+        /**
+         * a function that sets the parent of the node to a new parent
+         * @param parent the new parent of the node
+         */
         public void setParent(HeapNode parent) {
             this.parent = parent;
         }
 
+        /**
+         * a function that returns a LinkedList representing the children of the node
+         * @return the children of the node
+         */
         public LinkedList<HeapNode> getChildren() {
             return children;
         }
 
+       /**
+        * a functions that sets the children of the node to a new LinkedList
+        * @param children a new LinkedList of children
+        */
         public void setChildren(LinkedList<HeapNode> children) {
             this.children = children;
         }
 
+       /**
+        * a function that returns true if the node is marked, false otherwise
+        * @return true if the node is marked, false otherwise
+        */
         public boolean isMarked() {
             return mark;
         }
 
+        /**
+         * a function that sets the mark of the node to a new mark
+         * @param mark the new mark of the node
+         */
         public void setMark(boolean mark) {
             this.mark = mark;
         }
 
-        public void addChild(HeapNode child) {
+       /**
+        * a function which adds a child to the node
+        * @param child the child to be added
+        */
+       public void addChild(HeapNode child) {
             this.children.addFirst(child);
         }
 
+        /**
+         * a function which removes a child from the node
+         * @param child the child to be removed
+         */
         public void removeChild(HeapNode child) {
             this.children.remove(child);
         }
 
-        public void removeParent() {
+       /**
+        * a function which severs the connection between the node and its parent
+        * @post the node has no parent
+        * @return the parent of the node
+        */
+       public HeapNode removeParent() {
+            HeapNode parent = this.parent;
             this.parent = null;
+            return parent;
         }
 
+        /**
+         * a function that returns the rank of the node
+         * @return the rank of the node
+         */
         public int getRank() {
             return rank;
         }
 
+        /**
+         * a function that sets the rank of the node to a new rank
+         * @param rank the new rank of the node
+         */
         public void setRank(int rank) {
             this.rank = rank;
         }
