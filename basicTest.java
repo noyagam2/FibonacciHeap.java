@@ -16,7 +16,9 @@ public class basicTest {
     }
 
     @Test
-    public void testInsert(FibonacciHeap heap, int key) {
+    public void testInsert() {
+        int key = 15;
+        FibonacciHeap heap = new FibonacciHeap();
         heap.insert(key);
         assertEquals(heap.size(), 1);
         assertEquals(heap.findMin().getKey(), key);
