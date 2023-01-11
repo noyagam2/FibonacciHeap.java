@@ -74,20 +74,17 @@ public class FibonacciHeap
             return;
         }
         this.num_of_nodes--;
-        HeapNode after = this.min.getPrev();
-        this.treeList.remove(this.min);
+        HeapNode insert_children_here = this.findMin().getPrev(); //we will insert the children of the min node after this node
+        this.treeList.remove(this.findMin());
         if (this.min.getChildren().getSize() > 0){
-            HeapNode[] array_for_iteration = new HeapNode[this.min.getChildren().getSize()];
-            for (int i = 0; i < this.min.getChildren().getSize(); i++){
-                array_for_iteration[i] = this.min.getChildren().get(i);
-            }
+            HeapNode[] array_for_iteration = createArrayForIteration(this.min.getChildren());
             for (HeapNode child : array_for_iteration){
                 child.setParent(null);
                 if (child.isMarked()){
                     child.setMarked(false);
                     this.num_of_marked--;
                 }
-                this.treeList.addAfter(child, after);
+                this.treeList.addAfter(child, insert_children_here);
             }
         }
         this.consolidate();
@@ -142,10 +139,7 @@ public class FibonacciHeap
     {
         int highest_rank = (int) (Math.log(this.num_of_nodes) / Math.log(2) +1);
         int[] ranks = new int[highest_rank];
-        HeapNode[] array_for_iteration = new HeapNode[this.treeList.getSize()];
-        for (int i = 0; i < this.treeList.getSize(); i++){
-            array_for_iteration[i] = this.treeList.get(i);
-        }
+        HeapNode[] array_for_iteration = createArrayForIteration(this.treeList);
         for (HeapNode node : array_for_iteration){
             ranks[node.getRank()]++;
         }
@@ -177,7 +171,7 @@ public class FibonacciHeap
     {
     	x.setKey(x.getKey()-delta);
         this.min = x.getKey() < this.min.getKey() ? x : this.min;
-        if (x.getKey() < x.getParent().getKey()){
+        if (x.getParent()!= null && x.getKey() < x.getParent().getKey()){
             this.cascadingCuts(x);
         }
 
@@ -315,10 +309,7 @@ public class FibonacciHeap
         int highest_rank = (int) (Math.log(this.num_of_nodes) / Math.log(2) +1);
         int[] ranks = new int[highest_rank];
         HeapNode[] buckets = new HeapNode[highest_rank];
-        HeapNode[] array_for_iteration = new HeapNode[this.treeList.getSize()];
-        for (int i = 0; i < this.treeList.getSize(); i++){
-            array_for_iteration[i] = this.treeList.get(i);
-        }
+        HeapNode[] array_for_iteration = createArrayForIteration(this.treeList);
         HeapNode curr_min = this.treeList.getFirst();
         for (HeapNode node : array_for_iteration){
             curr_min = node.getKey() < curr_min.getKey() ? node : curr_min;
@@ -352,16 +343,23 @@ public class FibonacciHeap
         }
     }
 
-    protected void printHeap(){
-        HeapNode[] array_for_iteration = new HeapNode[this.treeList.getSize()];
-        for (int i = 0; i < this.treeList.getSize(); i++){
-            array_for_iteration[i] = this.treeList.get(i);
+
+    protected HeapNode[] createArrayForIteration(DoublyLinkedList list){
+        HeapNode[] array_for_iteration = new HeapNode[list.getSize()];
+        HeapNode node = list.getFirst();
+        for (int i = 0; i < list.getSize(); i++){
+            array_for_iteration[i] = node;
+            node = node.getNext();
         }
+        return array_for_iteration;
+    }
+
+    protected void printHeap(){
+        HeapNode[] array_for_iteration = createArrayForIteration(this.treeList);
         for (HeapNode node : array_for_iteration){
             new TraditionalTreePrinter().print(new BorderTreeNodeDecorator(node));
         }
     }
-
 
 
 
