@@ -73,25 +73,15 @@ public class FibonacciHeap
             this.min = null;
             return;
         }
+        DeleteMinIsRoot(); //Handle the case where the minimum is one of the binomial trees roots
         this.num_of_nodes--;
-        HeapNode insert_children_here = this.findMin().getPrev(); //we will insert the children of the min node after this node
-        this.treeList.remove(this.findMin());
-        if (this.min.getChildren().getSize() > 0){
-            HeapNode[] array_for_iteration = createArrayForIteration(this.min.getChildren());
-            for (HeapNode child : array_for_iteration){
-                child.setParent(null);
-                if (child.isMarked()){
-                    child.setMarked(false);
-                    this.num_of_marked--;
-                }
-                this.treeList.addAfter(child, insert_children_here);
-            }
-        }
         this.consolidate();
 
     }
 
-   /**
+
+
+    /**
     * public HeapNode findMin()
     *
     * Returns the node of the heap whose key is minimal, or null if the heap is empty.
@@ -169,11 +159,11 @@ public class FibonacciHeap
     */
     public void decreaseKey(HeapNode x, int delta)
     {
-    	x.setKey(x.getKey()-delta);
+    	/*x.setKey(x.getKey()-delta);
         this.min = x.getKey() < this.min.getKey() ? x : this.min;
         if (x.getParent()!= null && x.getKey() < x.getParent().getKey()){
             this.cascadingCuts(x);
-        }
+        }*/
 
     }
 
@@ -324,8 +314,12 @@ public class FibonacciHeap
         }
     }
 
+    /**
+     *
+     * @param node
+     */
     protected void cascadingCuts(HeapNode node){
-        HeapNode parent = node.getParent();
+       /* HeapNode parent = node.getParent();
         if(parent != null){ // node is not the root
             if(!node.isMarked()){ // node is not marked
                 node.setMarked(true);
@@ -340,10 +334,17 @@ public class FibonacciHeap
                 node.setMarked(false);
                 cascadingCuts(parent); // cut parent recursively
             }
-        }
+        }*/
     }
 
 
+    /**
+     * a function that creates an array from a list of heapNodes,
+     * can be the list of roots or a list of children
+     * used for iteration since we can't implement iterator for DoublyLinkedList
+     * @param list the list to be converted to an array
+     * @return an array of heapNodes
+     */
     protected HeapNode[] createArrayForIteration(DoublyLinkedList list){
         HeapNode[] array_for_iteration = new HeapNode[list.getSize()];
         HeapNode node = list.getFirst();
@@ -354,6 +355,32 @@ public class FibonacciHeap
         return array_for_iteration;
     }
 
+
+    /**
+     * a function that deletes the minimum node from the heap if it's a root of a binomial tree
+     * @pre the heap is not empty
+     * @pre the minimum node is a root of a binomial tree
+     * @post the minimum node is deleted from the heap
+     */
+    private void DeleteMinIsRoot() {
+        HeapNode insert_children_here = this.findMin().getPrev(); //we will insert the children of the min node after this node
+        this.treeList.remove(this.findMin());
+        if (this.min.getChildren().getSize() > 0){
+            HeapNode[] array_for_iteration = createArrayForIteration(this.min.getChildren()); //this is used to iterate since we can't implement iterator
+            for (HeapNode child : array_for_iteration){
+                child.setParent(null);
+                if (child.isMarked()){
+                    child.setMarked(false);
+                    this.num_of_marked--;
+                }
+                this.treeList.addAfter(child, insert_children_here);
+            }
+        }
+    }
+
+    /**
+     * an auxiliary function used to print the tree
+     */
     protected void printHeap(){
         HeapNode[] array_for_iteration = createArrayForIteration(this.treeList);
         for (HeapNode node : array_for_iteration){
