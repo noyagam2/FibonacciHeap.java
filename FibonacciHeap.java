@@ -155,7 +155,9 @@ public class FibonacciHeap
     */
     public void delete(HeapNode x)
     {
-        this.decreaseKey(x, Integer.MIN_VALUE);
+        if(x != this.findMin()) {
+            this.decreaseKey(x, x.getKey() - this.findMin().getKey() + 1);
+        }
         this.deleteMin();
     }
 
@@ -299,6 +301,9 @@ public class FibonacciHeap
      * @post the heap contains only trees of different ranks
      */
     protected void consolidate(){
+        if( this.treeList.size() == 0){
+            return;
+        }
         int highest_rank = (int) (Math.log(this.num_of_nodes) / Math.log(2) +1);
         int[] ranks = new int[highest_rank];
         HeapNode[] buckets = new HeapNode[highest_rank];
@@ -364,11 +369,28 @@ public class FibonacciHeap
     	public int key;
         private HeapNode parent;
         private LinkedList<HeapNode> children;
+        private HeapNode next;
+        private HeapNode prev;
         private boolean mark;
         private int rank;
 
+       public HeapNode getNext() {
+           return next;
+       }
 
-        /**
+       public void setNext(HeapNode next) {
+           this.next = next;
+       }
+
+       public HeapNode getPrev() {
+           return prev;
+       }
+
+       public void setPrev(HeapNode prev) {
+           this.prev = prev;
+       }
+
+       /**
          * constructor for HeapNode
          * @param key the key of the node
          */
@@ -506,6 +528,175 @@ public class FibonacciHeap
        }
 
    }
+
+    /**
+     * public class DoublyLinkedList
+     *
+     */
+    public static class DoublyLinkedList {
+
+        private HeapNode first;
+        private HeapNode last;
+        private int size;
+
+        /**
+         * constructor for DoublyLinkedList
+         */
+        public DoublyLinkedList() {
+            this.first = null;
+            this.last = null;
+            this.size = 0;
+        }
+
+        /**
+         * a function that returns the first node of the list
+         * @return the first node of the list
+         */
+        public HeapNode getFirst() {
+            return first;
+        }
+
+
+        /**
+         * a function that returns the last node of the list
+         * @return the last node of the list
+         */
+        public HeapNode getLast() {
+            return last;
+        }
+
+
+        /**
+         * a function that returns the size of the list
+         * @return the size of the list
+         */
+        public int getSize() {
+            return size;
+        }
+
+        /**
+         * a function that returns the node in the given index in the list, or null if the index is out of bounds
+         * @param index the index of the node to be returned
+         */
+        public HeapNode get(int index) {
+            if (index < 0 || index >= this.size) {
+                return null;
+            }
+            HeapNode node = this.first;
+            for (int i = 0; i < index; i++) {
+                node = node.getNext();
+            }
+            return node;
+        }
+
+
+        /**
+         * a function that adds a node to the end of the list
+         *
+         * @param node the node to be added
+         */
+        public void addLast(HeapNode node) {
+            if (this.size == 0) {
+                this.first = node;
+                this.last = node;
+                this.size++;
+            } else {
+                this.last.setNext(node);
+                node.setPrev(this.last);
+                this.last = node;
+                this.size++;
+            }
+        }
+
+        /**
+         * a function that adds a node to the beginning of the list
+         *
+         * @param node the node to be added
+         */
+        public void addFirst(HeapNode node) {
+            if (this.size == 0) {
+                this.first = node;
+                this.last = node;
+                this.size++;
+            } else {
+                this.first.setPrev(node);
+                node.setNext(this.first);
+                this.first = node;
+                this.size++;
+            }
+        }
+
+        /**
+         * a function that adds a node to the list after a given node
+         * @param node the node to be added
+         * @param after the node after which the node will be added
+         */
+        public void addAfter(HeapNode node, HeapNode after) {
+            if (after == this.last) {
+                this.addLast(node);
+            } else {
+                node.setNext(after.getNext());
+                node.setPrev(after);
+                after.getNext().setPrev(node);
+                after.setNext(node);
+                this.size++;
+            }
+        }
+
+        /**
+         * a function that concatenates two lists
+         * @param list the list to be concatenated after our list
+         */
+        public void addAll(DoublyLinkedList list) {
+            if (list.getSize() == 0) {
+                return;
+            }
+            if (this.size == 0) {
+                this.first = list.getFirst();
+                this.last = list.getLast();
+                this.size = list.getSize();
+            } else {
+                this.last.setNext(list.getFirst());
+                list.getFirst().setPrev(this.last);
+                this.last = list.getLast();
+                this.size += list.getSize();
+            }
+        }
+
+        /**
+         * a function that removes a node from the list
+         *
+         * @param node the node to be removed
+         */
+        public void remove(HeapNode node) {
+            if (this.size == 1) {
+                this.first = null;
+                this.last = null;
+                this.size--;
+            } else if (node == this.first) {
+                this.first = this.first.getNext();
+                this.first.setPrev(null);
+                this.size--;
+            } else if (node == this.last) {
+                this.last = this.last.getPrev();
+                this.last.setNext(null);
+                this.size--;
+            } else {
+                node.getPrev().setNext(node.getNext());
+                node.getNext().setPrev(node.getPrev());
+                this.size--;
+            }
+        }
+
+        /**
+         * a function that checks if list is empty
+         * @return true if the list is empty, otherwise false
+         */
+        public boolean isEmpty() {
+            return this.size == 0;
+        }
+
+    }
 }
 
 
