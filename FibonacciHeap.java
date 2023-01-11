@@ -1,5 +1,5 @@
 /**
- * FibonacciHeap
+ * FibonacciHeap 
  *
  * An implementation of a Fibonacci Heap over integers.
  */
