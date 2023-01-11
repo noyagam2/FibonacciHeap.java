@@ -159,15 +159,38 @@ public class FibonacciHeap
     */
     public void decreaseKey(HeapNode x, int delta)
     {
-    	/*x.setKey(x.getKey()-delta);
+    	x.setKey(x.getKey()-delta);
         this.min = x.getKey() < this.min.getKey() ? x : this.min;
         if (x.getParent()!= null && x.getKey() < x.getParent().getKey()){
-            this.cascadingCuts(x);
-        }*/
+            this.cut(x);
+        }
 
     }
 
-   /**
+    private void cut(HeapNode x) {
+        num_of_cuts++;
+        HeapNode parent = x.getParent();
+        if (x.isMarked()) {
+            this.num_of_marked--;
+        }
+        x.setMarked(false);
+        x.setParent(null);
+        x.setNext(null);
+        x.setPrev(null);
+        this.treeList.addFirst(x);
+        if (parent!=null) {
+            if (parent.isMarked()) {
+                this.cut(parent);
+            }
+            else {
+                parent.setMarked(true);
+                this.num_of_marked++;
+            }
+        }
+
+    }
+
+    /**
     * public int nonMarked()
     *
     * This function returns the current number of non-marked items in the heap
@@ -314,29 +337,6 @@ public class FibonacciHeap
         }
     }
 
-    /**
-     *
-     * @param node
-     */
-    protected void cascadingCuts(HeapNode node){
-       /* HeapNode parent = node.getParent();
-        if(parent != null){ // node is not the root
-            if(!node.isMarked()){ // node is not marked
-                node.setMarked(true);
-                this.num_of_marked++;
-            }
-            else{
-                parent.removeChild(node); // cut node from parent
-                this.num_of_marked--;
-                num_of_cuts++;
-                this.treeList.addFirst(node);
-                node.setParent(null);
-                node.setMarked(false);
-                cascadingCuts(parent); // cut parent recursively
-            }
-        }*/
-    }
-
 
     /**
      * a function that creates an array from a list of heapNodes,
@@ -363,10 +363,11 @@ public class FibonacciHeap
      * @post the minimum node is deleted from the heap
      */
     private void DeleteMinIsRoot() {
-        HeapNode insert_children_here = this.findMin().getPrev(); //we will insert the children of the min node after this node
-        this.treeList.remove(this.findMin());
-        if (this.min.getChildren().getSize() > 0){
-            HeapNode[] array_for_iteration = createArrayForIteration(this.min.getChildren()); //this is used to iterate since we can't implement iterator
+        HeapNode current_min = this.findMin();
+        HeapNode insert_children_here = current_min.getPrev(); //we will insert the children of the min node after this node
+        this.treeList.remove(current_min);
+        if (current_min.getChildren().getSize() > 0){
+            HeapNode[] array_for_iteration = createArrayForIteration(current_min.getChildren()); //this is used to iterate since we can't implement iterator
             for (HeapNode child : array_for_iteration){
                 child.setParent(null);
                 if (child.isMarked()){
