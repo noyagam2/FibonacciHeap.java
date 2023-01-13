@@ -37,5 +37,11 @@ class Heap {
         this.set.remove((Integer)i);
 
     }
+
+    public void print() {
+        for (int element : this.set) {
+            System.out.println(element);
+        }
+    }
 }
 

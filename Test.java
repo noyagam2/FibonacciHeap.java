@@ -1,4 +1,6 @@
 
+import org.junit.platform.engine.support.descriptor.FileSystemSource;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -340,15 +342,34 @@ public class Test {
         addKeys(1000);
         addKeysReverse(3000);
 
+        heap.print();
+        System.out.println("done!!!!!");
+        fibonacciHeap.printHeap();
+
         ArrayList<FibonacciHeap.HeapNode> nodes = new ArrayList<>();
 
         for (int i = 2000; i < 3000; i++) {
             heap.insert(i);
             nodes.add(fibonacciHeap.insert(i));
         }
+        //heap.print();
+        //System.out.println(fibonacciHeap);
 
-        for (int i = 2000; i < 2500; i++) {
+        for (int i = 2000; i < 2039; i++) {
+            //fibonacciHeap.printHeap();
             if (heap.findMin() != fibonacciHeap.findMin().getKey() || heap.size() != fibonacciHeap.size()) {
+                System.out.println("this 1  " + i);
+                bugFound(test);
+                return;
+            }
+            heap.delete(i);
+            fibonacciHeap.delete(nodes.get(i - 2000));
+        }
+
+        for (int i = 2040; i < 2500; i++) {
+            //fibonacciHeap.printHeap();
+            if (heap.findMin() != fibonacciHeap.findMin().getKey() || heap.size() != fibonacciHeap.size()) {
+                System.out.println("this 1  " + i);
                 bugFound(test);
                 return;
             }
@@ -358,6 +379,7 @@ public class Test {
 
         while (!heap.isEmpty()) {
             if (heap.findMin() != fibonacciHeap.findMin().getKey() || heap.size() != fibonacciHeap.size()) {
+                System.out.println("this 2");
                 bugFound(test);
                 return;
             }
@@ -365,6 +387,7 @@ public class Test {
             fibonacciHeap.deleteMin();
         }
         if (!fibonacciHeap.isEmpty())
+            System.out.println("this 3");
             bugFound(test);
     }
 
