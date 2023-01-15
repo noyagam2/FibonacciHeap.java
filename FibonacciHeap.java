@@ -74,8 +74,8 @@ public class FibonacciHeap
             return;
         }
         DeleteMinIsRoot(); //Handle the case where the minimum is one of the binomial trees roots
-        this.num_of_nodes--;
         this.consolidate();
+        this.num_of_nodes--;
 
     }
 
@@ -145,8 +145,10 @@ public class FibonacciHeap
      */
     public void delete(HeapNode x)
     {
+        int minus_infinity = Integer.MIN_VALUE;
+        int delta = x.getKey() + minus_infinity;
         if(x != this.findMin()) {
-            this.decreaseKey(x, 100000);
+            this.decreaseKey(x, delta);
         }
         this.deleteMin();
     }
@@ -176,14 +178,11 @@ public class FibonacciHeap
         x.setMarked(false);
         x.setParent(null);
 
-
-
         if (parent!=null) {
 
             if (parent.getChildren().size != 0) {
                 parent.getChildren().remove(x);
                 this.treeList.addFirst(x);
-                parent.setChildren(parent.getChildren());
             }
 
             if (parent.isMarked()) {
@@ -195,7 +194,6 @@ public class FibonacciHeap
                 this.num_of_marked++;
             }
         }
-
     }
 
     /**
@@ -327,7 +325,7 @@ public class FibonacciHeap
         if( this.treeList.getSize() == 0){
             return;
         }
-        int highest_rank = (int) (Math.log(this.num_of_nodes) / Math.log(2) +1);
+        int highest_rank = (int) (Math.log(this.num_of_nodes) / Math.log(2))+3; //Plus 3 for safety, because of the log
         int[] ranks = new int[highest_rank];
         HeapNode[] buckets = new HeapNode[highest_rank];
         HeapNode[] array_for_iteration = createArrayForIteration(this.treeList);
