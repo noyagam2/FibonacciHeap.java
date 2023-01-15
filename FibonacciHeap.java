@@ -79,8 +79,6 @@ public class FibonacciHeap
 
     }
 
-
-
     /**
      * public HeapNode findMin()
      *
@@ -169,33 +167,6 @@ public class FibonacciHeap
 
     }
 
-    private void cut(HeapNode x) {
-        num_of_cuts++;
-        HeapNode parent = x.getParent();
-        if (x.isMarked()) {
-            this.num_of_marked--;
-        }
-        x.setMarked(false);
-        x.setParent(null);
-
-        if (parent!=null) {
-
-            if (parent.getChildren().size != 0) {
-                parent.getChildren().remove(x);
-                this.treeList.addFirst(x);
-            }
-
-            if (parent.isMarked()) {
-                this.cut(parent);
-
-            }
-            else {
-                parent.setMarked(true);
-                this.num_of_marked++;
-            }
-        }
-    }
-
     /**
      * public int nonMarked()
      *
@@ -258,16 +229,23 @@ public class FibonacciHeap
         int[] arr = new int[k];
         FibonacciHeap aux_heap = new FibonacciHeap();
         HeapNode min = H.findMin();
-        aux_heap.insert(min.getKey());
+        HeapNode duplicate = min.duplicate();
+        aux_heap.insertNode(duplicate);
         for (int i= 0 ; i<k ; i++){
             min = aux_heap.findMin();
             arr[i] = min.getKey();
-            for (int j = 0; j < min.getChildren().getSize(); j++) {
-                aux_heap.insert(min.getChildren().get(j).getKey());
-            }
+            HeapNode org_min = min.original;
+            DoublyLinkedList children = org_min.getChildren();
+            HeapNode[] array_for_iteration = createArrayForIteration(children); // O(deg(H)),each node is a
+            // root of a tree with equal or less than 2^deg(H) = 2^log(n) = n nodes
+            // Therefore, each node has equal or less than deg(H) children (proved in ex4,q1,c)
             aux_heap.deleteMin();
+            for (HeapNode child : array_for_iteration){ // O(deg(H))
+                HeapNode duplicate_child = child.duplicate();
+                aux_heap.insertNode(duplicate_child);
+            }
         }
-        return arr; // should be replaced by student code
+        return arr;
     }
 
 
@@ -321,7 +299,7 @@ public class FibonacciHeap
      * @pre the heap is not empty
      * @post the heap contains only trees of different ranks
      */
-    protected void consolidate(){
+    private void consolidate(){
         if( this.treeList.getSize() == 0){
             return;
         }
@@ -351,7 +329,7 @@ public class FibonacciHeap
      * @param list the list to be converted to an array
      * @return an array of heapNodes
      */
-    protected HeapNode[] createArrayForIteration(DoublyLinkedList list){
+    private static HeapNode[] createArrayForIteration(DoublyLinkedList list){
         HeapNode[] array_for_iteration = new HeapNode[list.getSize()];
         HeapNode node = list.getFirst();
         for (int i = 0; i < list.getSize(); i++){
@@ -383,7 +361,59 @@ public class FibonacciHeap
                 this.treeList.addAfter(child, insert_children_here);
             }
         }
+        else if (this.treeList.getSize() == 0){
+            this.min = null;
+        }
     }
+
+    /**
+     * a function that cuts a node from its parent and adds it to the root list
+     * works recursively - if the parent is marked it cuts it as well
+     * @inv: each node looses at most one child if it is a child itself
+     * @param x - the node to cut
+     * @post - x is not a child of its parent and is a node in the root list
+     * @post num_of_cuts >= prev(num_of_cuts)
+     * @post num_of_marked <= prev(num_of_marked) (if parent was marked) or
+     * num_of_marked = prev(num_of_marked) + 1 (if parent was not marked)
+     */
+
+    private void cut(HeapNode x) {
+        num_of_cuts++;
+        HeapNode parent = x.getParent();
+        if (x.isMarked()) {  //if x is marked, unmark it
+            this.num_of_marked--;
+        }
+        x.setMarked(false);
+        x.setParent(null);
+
+        if (parent!=null) { //if x is not a root, remove it from its parent's children list and add it to the root list
+            parent.getChildren().remove(x);
+            this.treeList.addFirst(x);
+            if (parent.isMarked()) { //if the parent is marked, cut it as well
+                this.cut(parent);
+            }
+            else { //if the parent is not marked, mark it
+                parent.setMarked(true);
+                this.num_of_marked++;
+            }
+        }
+    }
+
+    /**
+     * a function that inserts a node to the heap
+     * updates the total number of nodes in heap and the minimum node if needed
+     * @param root the node to insert
+     * @return the node that was inserted
+     */
+    private HeapNode insertNode(HeapNode root){
+        this.treeList.addFirst(root);
+        this.num_of_nodes+=Math.pow(2,root.getRank());
+        if (this.min == null || root.getKey() < this.min.getKey()){
+            this.min = root;
+        }
+        return root;
+    }
+
 
     /**
      * an auxiliary function used to print the tree
@@ -394,12 +424,6 @@ public class FibonacciHeap
             new TraditionalTreePrinter().print(new BorderTreeNodeDecorator(node));
         }
     }
-
-
-
-
-
-
 
 
     //------------------------------------HeapNode------------------------------------//
@@ -419,24 +443,9 @@ public class FibonacciHeap
         private DoublyLinkedList children;
         private HeapNode next;
         private HeapNode prev;
+        private HeapNode original;
         private boolean mark;
         private int rank;
-
-        public HeapNode getNext() {
-            return next;
-        }
-
-        public void setNext(HeapNode next) {
-            this.next = next;
-        }
-
-        public HeapNode getPrev() {
-            return prev;
-        }
-
-        public void setPrev(HeapNode prev) {
-            this.prev = prev;
-        }
 
         /**
          * constructor for HeapNode
@@ -499,6 +508,38 @@ public class FibonacciHeap
         }
 
         /**
+         * a function that returns the next node in the list
+         * @return the next node in the  list
+         */
+        public HeapNode getNext() {
+            return next;
+        }
+
+        /**
+         * a function that sets the next node in the list to a new node
+         * @param next the new next node in the list
+         */
+        public void setNext(HeapNode next) {
+            this.next = next;
+        }
+
+        /**
+         * a function that returns the previous node in the list
+         * @return the previous node in the list
+         */
+        public HeapNode getPrev() {
+            return prev;
+        }
+
+        /**
+         * a function that sets the previous node in the list to a new node
+         * @param prev the new previous node in the list
+         */
+        public void setPrev(HeapNode prev) {
+            this.prev = prev;
+        }
+
+        /**
          * a function that returns true if the node is marked, false otherwise
          * @return true if the node is marked, false otherwise
          */
@@ -522,24 +563,6 @@ public class FibonacciHeap
             this.children.addFirst(child);
         }
 
-        /**
-         * a function which removes a child from the node
-         * @param child the child to be removed
-         */
-        public void removeChild(HeapNode child) {
-            this.children.remove(child);
-        }
-
-        /**
-         * a function which severs the connection between the node and its parent
-         * @post the node has no parent
-         * @return the parent of the node
-         */
-        public HeapNode removeParent() {
-            HeapNode parent = this.parent;
-            this.parent = null;
-            return parent;
-        }
 
         /**
          * a function that returns the rank of the node
@@ -555,6 +578,19 @@ public class FibonacciHeap
          */
         public void setRank(int rank) {
             this.rank = rank;
+        }
+
+        /**
+         * a function that returns a duplicate node of the node
+         * a duplicate node is a node with the same key as the original node, and a pointer to the original node.
+         * it has no members other than original and key.
+         * @return a duplicate node of the node
+         */
+
+        private HeapNode duplicate() {
+            HeapNode duplicate = new HeapNode(this.key);
+            duplicate.original = this;
+            return duplicate;
         }
 
 
