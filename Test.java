@@ -772,6 +772,7 @@ public class Test {
     }
 
     static void test22() {
+        //Potential = #trees + 2*#marked
         String test = "test22";
         fibonacciHeap = new FibonacciHeap();
 
@@ -793,7 +794,7 @@ public class Test {
         }
 
 
-        if (fibonacciHeap.potential() != 1)
+        if (fibonacciHeap.potential() != 1) //we only delete min so no marked nodes, only one tree
             bugFound(test);
 
         int totalCuts = FibonacciHeap.totalCuts();
@@ -813,7 +814,7 @@ public class Test {
                 noCascading = false;
         }
 
-        boolean potential = fibonacciHeap.potential() != treeSize;
+        boolean potential = fibonacciHeap.potential() != treeSize; //after the deletions all we have is #treeSize nodes, each one is a root so potential = #trees
         boolean cuts = FibonacciHeap.totalCuts() - totalCuts != treeSize-1;
         boolean blinks = FibonacciHeap.totalLinks() - links != 0;
         boolean counters = fibonacciHeap.countersRep()[0] != treeSize;
@@ -979,19 +980,20 @@ public class Test {
             firstFibonacciHeap.insert(i);
             secondFibonacciHeap.insert(i + 100);
         }
-        //firstFibonacciHeap.meld(secondFibonacciHeap);
+        firstFibonacciHeap.meld(secondFibonacciHeap);
         int i = 0;
         while (!firstFibonacciHeap.isEmpty()) {
             FibonacciHeap.HeapNode min = firstFibonacciHeap.findMin();
             int minValue = min.getKey();
             if (minValue != i) {
-                grade -= 8;
+               bugFound("test30");
             }
             firstFibonacciHeap.deleteMin();
             i++;
         }
 
     }
+
 
     static void bugFound(String test) {
         System.out.println("Bug found in " + test);

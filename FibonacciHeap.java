@@ -161,7 +161,7 @@ public class FibonacciHeap
     {
         x.setKey(x.getKey()-delta);
         this.min = x.getKey() < this.min.getKey() ? x : this.min;
-        if (x.getParent()!= null && x.getKey() < x.getParent().getKey()){
+        if (x.getParent()!= null && x.getKey() <= x.getParent().getKey()){
             this.cut(x);
         }
 
@@ -258,7 +258,7 @@ public class FibonacciHeap
      * @param node2 the root of the second tree
      * @return the root of the new tree
      */
-    protected HeapNode link(HeapNode node1, HeapNode node2){
+    private HeapNode link(HeapNode node1, HeapNode node2){
         boolean isNode1Min = (node1.getKey() < node2.getKey());
         HeapNode parent = isNode1Min ? node1 : node2;
         HeapNode child = isNode1Min ? node2 : node1;
@@ -278,7 +278,7 @@ public class FibonacciHeap
      * @param buckets an array that contains the trees in the heap
      */
 
-    protected void fillBuckets(HeapNode node, int[] ranks, HeapNode[] buckets){
+    private void fillBuckets(HeapNode node, int[] ranks, HeapNode[] buckets){
         int curr_tree_rank = node.getRank();
         if(ranks[curr_tree_rank] == 1){
             HeapNode other_tree = buckets[curr_tree_rank];
@@ -378,6 +378,9 @@ public class FibonacciHeap
      */
 
     private void cut(HeapNode x) {
+        if(x.getParent() == null){
+            return;
+        }
         num_of_cuts++;
         HeapNode parent = x.getParent();
         if (x.isMarked()) {  //if x is marked, unmark it
@@ -388,13 +391,33 @@ public class FibonacciHeap
 
         if (parent!=null) { //if x is not a root, remove it from its parent's children list and add it to the root list
             parent.getChildren().remove(x);
+            parent.setRank(parent.getRank() - 1);
             this.treeList.addFirst(x);
-            if (parent.isMarked()) { //if the parent is marked, cut it as well
+
+            if (parent.isMarked()) { //handle the case where the parent is marked
                 this.cut(parent);
             }
-            else { //if the parent is not marked, mark it
-                parent.setMarked(true);
-                this.num_of_marked++;
+            else {  //handle the case where the parent is not marked
+                handleParentNotMarked(parent);
+            }
+        }
+    }
+
+    private void handleParentNotMarked(HeapNode parent) {
+        HeapNode grandparent = parent.getParent();
+        if (grandparent != null) { //if the parent is not a root
+            parent.setMarked(true);
+            this.num_of_marked++;
+            int num_of_marked_siblings = 0;
+            HeapNode[] array_for_iteration = createArrayForIteration(grandparent.getChildren());
+            for (HeapNode child : array_for_iteration) {
+                if (child.isMarked()) {
+                    num_of_marked_siblings++;
+                }
+                if (num_of_marked_siblings > 1) {
+                    cut(grandparent);
+                    break;
+                }
             }
         }
     }
@@ -586,7 +609,6 @@ public class FibonacciHeap
          * it has no members other than original and key.
          * @return a duplicate node of the node
          */
-
         private HeapNode duplicate() {
             HeapNode duplicate = new HeapNode(this.key);
             duplicate.original = this;
@@ -800,27 +822,6 @@ public class FibonacciHeap
     }
 
     public static void main (String[]args){
-        FibonacciHeap myHeap = new FibonacciHeap();
-        myHeap.insert(5);
-        myHeap.insert(6);
-        HeapNode node = myHeap.insert(7);
-        myHeap.insert(3);
-        myHeap.insert(2);
-        myHeap.insert(1);
-        myHeap.insert(4);
-
-
-        myHeap.deleteMin();
-        myHeap.printHeap();
-        System.out.println(myHeap.min.getKey());
-        System.out.println(myHeap.findMin().getKey());
-        myHeap.decreaseKey(node,7);
-        myHeap.printHeap();
-        System.out.println("!!!!!");
-        System.out.println(myHeap.min.getKey());
-        System.out.println(myHeap.findMin().getKey());
-        myHeap.deleteMin();
-        myHeap.printHeap();
 
 
 
