@@ -249,6 +249,8 @@ public class FibonacciHeap
     }
 
 
+    //------------------------------------Private Methods------------------------------------
+
     /**
      * a function that links two trees of the same rank
      * the tree with the smaller root will be the child of the other tree
@@ -378,7 +380,7 @@ public class FibonacciHeap
      */
 
     private void cut(HeapNode x) {
-        if(x.getParent() == null){
+        if(x.getParent() == null){ //you can't cut a root
             return;
         }
         num_of_cuts++;
@@ -403,6 +405,11 @@ public class FibonacciHeap
         }
     }
 
+    /**
+     * a function that handles the case where the parent of a node is not marked
+     * @param parent - the parent of the node that was cut
+     * @post - cut operation is done correctly, the invariant of function cut is preserved
+     */
     private void handleParentNotMarked(HeapNode parent) {
         HeapNode grandparent = parent.getParent();
         if (grandparent != null) { //if the parent is not a root
@@ -640,6 +647,8 @@ public class FibonacciHeap
 
     }
 
+    //------------------------------------DoublyLinkedList------------------------------------//
+
     /**
      * public class DoublyLinkedList
      *
@@ -810,23 +819,8 @@ public class FibonacciHeap
                 this.size--;
             }
         }
-
-        /**
-         * a function that checks if list is empty
-         * @return true if the list is empty, otherwise false
-         */
-        public boolean isEmpty() {
-            return this.size == 0;
-        }
-
     }
 
-    public static void main (String[]args){
-
-
-
-
-    }
 }
 
 
