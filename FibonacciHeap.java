@@ -1,14 +1,3 @@
-
-
-// This imports are used for printing the heap
-import java.util.LinkedList;
-import java.util.List;
-import hu.webarticum.treeprinter.TreeNode;
-import hu.webarticum.treeprinter.decorator.BorderTreeNodeDecorator;
-import hu.webarticum.treeprinter.printer.traditional.TraditionalTreePrinter;
-import hu.webarticum.treeprinter.text.ConsoleText;
-
-
 /**
  * FibonacciHeap
  *
@@ -59,6 +48,8 @@ public class FibonacciHeap
         this.num_of_nodes++;
         this.treeList.addFirst(node);
         return node;
+
+        //works in O(1)
     }
 
     /**
@@ -73,10 +64,11 @@ public class FibonacciHeap
             this.min = null;
             return;
         }
-        DeleteMinIsRoot(); //Handle the case where the minimum is one of the binomial trees roots
-        this.consolidate();
+        DeleteMinIsRoot(); //Handle the case where the minimum is one of the binomial trees roots. O(log(n)).
+        this.consolidate(); //O(log(n)) amortized
         this.num_of_nodes--;
 
+        //works in O(log(n)) amortized
     }
 
     /**
@@ -88,6 +80,8 @@ public class FibonacciHeap
     public HeapNode findMin()
     {
         return this.min;
+
+        //works in O(1)
     }
 
     /**
@@ -103,6 +97,7 @@ public class FibonacciHeap
         this.min = this.min.getKey() < heap2.min.getKey() ? this.min : heap2.min;
         this.treeList.addAll(heap2.treeList);
 
+        //works in O(1)
     }
 
     /**
@@ -114,6 +109,8 @@ public class FibonacciHeap
     public int size()
     {
         return num_of_nodes;
+
+        //works in O(1)
     }
 
     /**
@@ -125,6 +122,7 @@ public class FibonacciHeap
      */
     public int[] countersRep()
     {
+        //We will assume log operations are O(1)
         int highest_rank = (int) (Math.log(this.num_of_nodes) / Math.log(2) +1);
         int[] ranks = new int[highest_rank];
         HeapNode[] array_for_iteration = createArrayForIteration(this.treeList);
@@ -132,6 +130,8 @@ public class FibonacciHeap
             ranks[node.getRank()]++;
         }
         return ranks;
+
+        //works in O(n)
     }
 
     /**
@@ -146,9 +146,11 @@ public class FibonacciHeap
         int minus_infinity = Integer.MIN_VALUE;
         int delta = x.getKey() + minus_infinity;
         if(x != this.findMin()) {
-            this.decreaseKey(x, delta);
+            this.decreaseKey(x, delta); //O(1) amortized
         }
-        this.deleteMin();
+        this.deleteMin(); //O(log(n)) amortized
+
+        //works in O(log(n)) amortized
     }
 
     /**
@@ -164,6 +166,8 @@ public class FibonacciHeap
         if (x.getParent()!= null && x.getKey() <= x.getParent().getKey()){
             this.cut(x);
         }
+
+        //works in O(1) amortized
 
     }
 
@@ -254,6 +258,7 @@ public class FibonacciHeap
     /**
      * a function that links two trees of the same rank
      * the tree with the smaller root will be the child of the other tree
+     * works in O(1)
      * @pre node1 and node2 are trees of the same rank
      * @post node1 is the parent of node2 or vice versa, new tree has rank+1
      * @param node1 the root of the first tree
@@ -273,6 +278,10 @@ public class FibonacciHeap
 
     /**
      * a function that fills the buckets array with the trees in the heap
+     * the function works recursively. If there's already a tree in the bucket with the same rank as the tree
+     * we're currently looking at (the one which has node as root), we link the two trees and put the new tree in the
+     * bucket with the rank+1. Since there can only be 1 tree in each bucket,and the number of buckets is O(log(n)),
+     * the function works in O(log(n))
      * @pre the buckets array is empty
      * @post the buckets array contains the trees in the heap, after linking them
      * @param node the root of the tree to be added to the buckets array
@@ -298,6 +307,7 @@ public class FibonacciHeap
 
     /**
      * a function that consolidates the trees in the heap
+     * works in O(log(n)) amortized time, O(n) worst case as described in the lecture
      * @pre the heap is not empty
      * @post the heap contains only trees of different ranks
      */
@@ -306,7 +316,7 @@ public class FibonacciHeap
             return;
         }
         int highest_rank = (int) (Math.log(this.num_of_nodes) / Math.log(2))+3; //Plus 3 for safety, because of the log
-        int[] ranks = new int[highest_rank];
+        int[] ranks = new int[highest_rank]; //size of the array is log(n)
         HeapNode[] buckets = new HeapNode[highest_rank];
         HeapNode[] array_for_iteration = createArrayForIteration(this.treeList);
         HeapNode curr_min = this.treeList.getFirst();
@@ -328,6 +338,7 @@ public class FibonacciHeap
      * a function that creates an array from a list of heapNodes,
      * can be the list of roots or a list of children
      * used for iteration since we can't implement iterator for DoublyLinkedList
+     * works in O(n) time
      * @param list the list to be converted to an array
      * @return an array of heapNodes
      */
@@ -344,6 +355,7 @@ public class FibonacciHeap
 
     /**
      * a function that deletes the minimum node from the heap if it's a root of a binomial tree
+     * works in O(log(n)) since a root of a binomial tree has O(log(n)) children, and we iterate over them
      * @pre the heap is not empty
      * @pre the minimum node is a root of a binomial tree
      * @post the minimum node is deleted from the heap
@@ -351,10 +363,12 @@ public class FibonacciHeap
     private void DeleteMinIsRoot() {
         HeapNode current_min = this.findMin();
         HeapNode insert_children_here = current_min.getPrev(); //we will insert the children of the min node after this node
-        this.treeList.remove(current_min);
+        this.treeList.remove(current_min); //O(1)
+
         if (current_min.getChildren().getSize() > 0){
-            HeapNode[] array_for_iteration = createArrayForIteration(current_min.getChildren()); //this is used to iterate since we can't implement iterator
-            for (HeapNode child : array_for_iteration){
+            HeapNode[] array_for_iteration = createArrayForIteration(current_min.getChildren());
+            //createArrayForIteration is used to iterate since we can't implement iterator, works in O(n) time
+            for (HeapNode child : array_for_iteration){ //O(deg(H)) = O(log(n))
                 child.setParent(null);
                 if (child.isMarked()){
                     child.setMarked(false);
@@ -363,14 +377,15 @@ public class FibonacciHeap
                 this.treeList.addAfter(child, insert_children_here);
             }
         }
-        else if (this.treeList.getSize() == 0){
+        else if (this.treeList.getSize() == 0){ //if heap had only one node, now it's empty
             this.min = null;
         }
     }
 
     /**
      * a function that cuts a node from its parent and adds it to the root list
-     * works recursively - if the parent is marked it cuts it as well
+     * the function is recursive - if the parent is marked it cuts it as well
+     * works in O(1) amortized time as described in the lecture for cascading cuts
      * @inv: each node looses at most one child if it is a child itself
      * @param x - the node to cut
      * @post - x is not a child of its parent and is a node in the root list
@@ -407,6 +422,7 @@ public class FibonacciHeap
 
     /**
      * a function that handles the case where the parent of a node is not marked
+     * works in amortized O(1) time
      * @param parent - the parent of the node that was cut
      * @post - cut operation is done correctly, the invariant of function cut is preserved
      */
@@ -432,27 +448,20 @@ public class FibonacciHeap
     /**
      * a function that inserts a node to the heap
      * updates the total number of nodes in heap and the minimum node if needed
+     * works in O(1) time
+     * @pre - the node is not in the heap
+     * @pre - the node is a single node (has no children)
+     * @post - the node is in the heap
      * @param root the node to insert
      * @return the node that was inserted
      */
     private HeapNode insertNode(HeapNode root){
         this.treeList.addFirst(root);
-        this.num_of_nodes+=Math.pow(2,root.getRank());
+        this.num_of_nodes+=1;
         if (this.min == null || root.getKey() < this.min.getKey()){
             this.min = root;
         }
         return root;
-    }
-
-
-    /**
-     * an auxiliary function used to print the tree
-     */
-    protected void printHeap(){
-        HeapNode[] array_for_iteration = createArrayForIteration(this.treeList);
-        for (HeapNode node : array_for_iteration){
-            new TraditionalTreePrinter().print(new BorderTreeNodeDecorator(node));
-        }
     }
 
 
@@ -466,7 +475,7 @@ public class FibonacciHeap
      *
      */
 
-    public static class HeapNode implements TreeNode {
+    public static class HeapNode {
 
         public int key;
         private HeapNode parent;
@@ -587,6 +596,7 @@ public class FibonacciHeap
 
         /**
          * a function which adds a child to the node
+         * works in O(1) time
          * @param child the child to be added
          */
         public void addChild(HeapNode child) {
@@ -614,6 +624,7 @@ public class FibonacciHeap
          * a function that returns a duplicate node of the node
          * a duplicate node is a node with the same key as the original node, and a pointer to the original node.
          * it has no members other than original and key.
+         * works in O(1) time
          * @return a duplicate node of the node
          */
         private HeapNode duplicate() {
@@ -622,28 +633,6 @@ public class FibonacciHeap
             return duplicate;
         }
 
-
-        /**
-         * Gets the content of this node.
-         */
-        @Override
-        public ConsoleText content() {
-            String s = " " + this.getKey() + " ";
-            return  ConsoleText.of(s);
-        }
-
-        /**
-         * Gets the list of child nodes of this node.
-         */
-        @Override
-        public List<TreeNode> children() {
-            LinkedList<TreeNode> list = new LinkedList<>();
-            for (int i = 0; i < this.getChildren().getSize(); i++){
-                list.add(this.getChildren().get(i));
-            }
-
-            return list;
-        }
 
     }
 
@@ -695,24 +684,8 @@ public class FibonacciHeap
         }
 
         /**
-         * a function that returns the node in the given index in the list, or null if the index is out of bounds
-         * @param index the index of the node to be returned
-         */
-        public HeapNode get(int index) {
-            if (index < 0 || index >= this.size) {
-                return null;
-            }
-            HeapNode node = this.first;
-            for (int i = 0; i < index; i++) {
-                node = node.getNext();
-            }
-            return node;
-        }
-
-
-        /**
          * a function that adds a node to the end of the list
-         *
+         * works in O(1) time
          * @param node the node to be added
          */
         public void addLast(HeapNode node) {
@@ -732,7 +705,7 @@ public class FibonacciHeap
 
         /**
          * a function that adds a node to the beginning of the list
-         *
+         * works in O(1) time
          * @param node the node to be added
          */
         public void addFirst(HeapNode node) {
@@ -752,6 +725,9 @@ public class FibonacciHeap
 
         /**
          * a function that adds a node to the list after a given node
+         * works in O(1) time
+         * @pre after is a node in the list
+         * @post after.getNext() == node
          * @param node the node to be added
          * @param after the node after which the node will be added
          */
@@ -773,6 +749,7 @@ public class FibonacciHeap
 
         /**
          * a function that concatenates two lists
+         * works in O(1) time
          * @param list the list to be concatenated after our list
          */
         public void addAll(DoublyLinkedList list) {
@@ -793,8 +770,9 @@ public class FibonacciHeap
 
         /**
          * a function that removes a node from the list
-         *
-         * @param node the node to be removed
+         * works in O(1) time
+         * @pre the node is in the list
+         * @param node a pointer to the node to be removed
          */
         public void remove(HeapNode node) {
             if (this.size == 1) {
@@ -802,7 +780,6 @@ public class FibonacciHeap
                 this.last = null;
                 this.size--;
             } else if (node == this.first) {
-
                 this.first = this.first.getNext();
                 if (this.first != null)
                     this.first.setPrev(null);
