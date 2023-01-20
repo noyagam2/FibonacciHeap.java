@@ -7,9 +7,9 @@ public class FibonacciHeap
 {
     private static int  num_of_links=0;
     private static int  num_of_cuts=0;
+    private int num_of_nodes=0;
     private int  num_of_marked=0;
     private HeapNode min = null;
-    private int num_of_nodes=0;
     private DoublyLinkedList treeList;
 
     public FibonacciHeap() {
@@ -64,8 +64,8 @@ public class FibonacciHeap
             this.min = null;
             return;
         }
-        DeleteMinIsRoot(); //Handle the case where the minimum is one of the binomial trees roots. O(log(n)).
-        this.consolidate(); //O(log(n)) amortized
+        deleteMinIsRoot(); //Handle the case where the minimum is one of the binomial trees roots. O(log(n)).
+        consolidate(); //O(log(n)) amortized
         this.num_of_nodes--;
 
         //works in O(log(n)) amortized
@@ -259,7 +259,9 @@ public class FibonacciHeap
      * a function that links two trees of the same rank
      * the tree with the smaller root will be the child of the other tree
      * works in O(1)
-     * @pre node1 and node2 are trees of the same rank
+     * @pre node1.getRank() == node2.getRank()
+     * @pre node1!=null && node2!=null
+     * @pre node1 != node2
      * @post node1 is the parent of node2 or vice versa, new tree has rank+1
      * @param node1 the root of the first tree
      * @param node2 the root of the second tree
@@ -360,7 +362,7 @@ public class FibonacciHeap
      * @pre the minimum node is a root of a binomial tree
      * @post the minimum node is deleted from the heap
      */
-    private void DeleteMinIsRoot() {
+    private void deleteMinIsRoot() {
         HeapNode current_min = this.findMin();
         HeapNode insert_children_here = current_min.getPrev(); //we will insert the children of the min node after this node
         this.treeList.remove(current_min); //O(1)
@@ -479,12 +481,13 @@ public class FibonacciHeap
 
         public int key;
         private HeapNode parent;
-        private DoublyLinkedList children;
         private HeapNode next;
         private HeapNode prev;
         private HeapNode original;
         private boolean mark;
         private int rank;
+        private DoublyLinkedList children;
+
 
         /**
          * constructor for HeapNode
@@ -594,15 +597,6 @@ public class FibonacciHeap
             this.mark = mark;
         }
 
-        /**
-         * a function which adds a child to the node
-         * works in O(1) time
-         * @param child the child to be added
-         */
-        public void addChild(HeapNode child) {
-            this.children.addFirst(child);
-        }
-
 
         /**
          * a function that returns the rank of the node
@@ -618,6 +612,15 @@ public class FibonacciHeap
          */
         public void setRank(int rank) {
             this.rank = rank;
+        }
+
+        /**
+         * a function which adds a child to the node
+         * works in O(1) time
+         * @param child the child to be added
+         */
+        private void addChild(HeapNode child) {
+            this.children.addFirst(child);
         }
 
         /**
